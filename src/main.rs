@@ -9,8 +9,8 @@ const SCREEN: (f32, f32) = (800.0, 600.0);
 const TILES: (u16, u16) = (40, 30);
 const TILE_SIZE: (u16, u16) = (20, 20);
 const BG_COLOR: (u8, u8, u8) = (127, 127, 255);
-const SNAKE_COLOR: (u8, u8, u8) = (0, 255, 0);
-const FOOD_COLOR: (u8, u8, u8) = (0, 255, 0);
+const SNAKE_COLOR: (u8, u8, u8) = (63, 127, 63);
+const FOOD_COLOR: (u8, u8, u8) = (255, 127, 0);
 
 enum Direction {
   Up,
@@ -51,9 +51,23 @@ impl GameState {
         graphics::Color::from_rgb(
           SNAKE_COLOR.0, SNAKE_COLOR.1, SNAKE_COLOR.2))?;
 
-        graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
-
+      graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
     }
+
+    Ok(())
+  }
+
+  fn draw_food(&mut self, ctx: &mut Context) -> GameResult {
+    let rect = graphics::Rect::new(
+      (self.food.0 * TILE_SIZE.0) as f32,
+      (self.food.1 * TILE_SIZE.1) as f32,
+      TILE_SIZE.0 as f32, TILE_SIZE.1 as f32);
+
+    let rect_mesh = graphics::Mesh::new_rectangle(ctx,
+      graphics::DrawMode::fill(), rect,
+      graphics::Color::from_rgb(FOOD_COLOR.0, FOOD_COLOR.1, FOOD_COLOR.2))?;
+
+    graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
 
     Ok(())
   }
@@ -69,6 +83,7 @@ impl event::EventHandler for GameState {
       BG_COLOR.0, BG_COLOR.1, BG_COLOR.2));
 
     self.draw_snake(ctx);
+    self.draw_food(ctx);
 
     graphics::present(ctx)?;
     Ok(())
