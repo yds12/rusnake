@@ -5,13 +5,25 @@ use ggez::event;
 use ggez::input::keyboard::{self, KeyCode};
 use rand::prelude::*;
 
+// Size of the screen in pixels
 const SCREEN: (f32, f32) = (800.0, 600.0);
+
+// Number of tiles in the screen
 const TILES: (u16, u16) = (40, 30);
+
+// Size of the tiles
 const TILE_SIZE: (u16, u16) = (20, 20);
+
+// Colors of the game entities
 const BG_COLOR: (u8, u8, u8) = (127, 127, 255);
 const SNAKE_COLOR: (u8, u8, u8) = (63, 127, 63);
 const FOOD_COLOR: (u8, u8, u8) = (255, 127, 0);
+
+// padding around the tiles
 const PADDING: u16 = 2;
+
+// secs between each move of the snake
+const TICK: f32 = 1.0;
 
 enum Direction {
   Up,
@@ -23,7 +35,8 @@ enum Direction {
 struct GameState {
   snake: Vec<(u16, u16)>,
   food: (u16, u16),
-  direction: Direction
+  direction: Direction,
+  acc_time: f32
 }
 
 impl GameState {
@@ -32,11 +45,13 @@ impl GameState {
     let mut snake = vec![(1, 1), (2, 1), (3, 1)];
     let mut food = (5, 5);
     let mut direction = Direction::Right;
+    let mut acc_time = 0.0;
 
     GameState {
       snake,
       food,
-      direction
+      direction,
+      acc_time
     }
   }
 
@@ -74,10 +89,44 @@ impl GameState {
 
     Ok(())
   }
+
+  fn move_snake(&mut self) -> GameResult {
+    let last_cell = &self.snake[self.snake.len() - 1];
+
+    match self.direction {
+      Direction::Right => self.snake.push((last_cell.0 + 1, last_cell.1)),
+      Direction::Down => self.snake.push((last_cell.0, last_cell.1 + 1)),
+      Direction::Left => self.snake.push((last_cell.0 - 1, last_cell.1)),
+      Direction::Up => self.snake.push((last_cell.0, last_cell.1 - 1))
+    };
+
+    self.snake.remove(0);
+    Ok(())
+  }
 }
 
 impl event::EventHandler for GameState {
   fn update(&mut self, ctx: &mut Context) -> GameResult {
+    self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
+
+    if self.acc_time >= TICK {
+      self.move_snake();
+      self.acc_time = 0.0;
+    }
+
+    if keyboard::is_key_pressed(ctx, KeyCode::Right) {
+      self.direction = Direction::Right;
+    }
+    if keyboard::is_key_pressed(ctx, KeyCode::Down) {
+      self.direction = Direction::Down;
+    }
+    if keyboard::is_key_pressed(ctx, KeyCode::Left) {
+      self.direction = Direction::Left;
+    }
+    if keyboard::is_key_pressed(ctx, KeyCode::Up) {
+      self.direction = Direction::Up;
+    }
+
     Ok(())
   }
 
