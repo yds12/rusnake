@@ -122,12 +122,24 @@ impl GameState {
     let last_cell = &self.snake[self.snake.len() - 1];
 
     if &self.food == last_cell {
-      let mut rng = rand::thread_rng();
-      let food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
-      let food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
+      self.gen_food();
+      self.grow();
+    }
+  }
+
+  fn gen_food(&mut self) {
+    let mut rng = rand::thread_rng();
+
+    loop {
+      let mut food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
+      let mut food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
+
+      if self.snake.iter().any(|&cell| cell == (food_x, food_y)) {
+        continue;
+      }
 
       self.food = (food_x, food_y);
-      self.grow();
+      break;
     }
   }
 
