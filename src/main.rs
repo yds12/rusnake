@@ -29,11 +29,18 @@ enum Direction {
   Left
 }
 
+enum State {
+  Waiting,
+  Ongoing,
+  Dead
+}
+
 struct GameState {
   snake: Vec<(u16, u16)>,
   food: (u16, u16),
   direction: Direction,
-  acc_time: f32
+  acc_time: f32,
+  state: State
 }
 
 impl GameState {
@@ -43,12 +50,14 @@ impl GameState {
     let mut food = (5, 5);
     let mut direction = Direction::Right;
     let mut acc_time = 0.0;
+    let mut state = State::Waiting;
 
     GameState {
       snake,
       food,
       direction,
-      acc_time
+      acc_time,
+      state
     }
   }
 
@@ -102,17 +111,26 @@ impl GameState {
   }
 
   fn update_keyboard(&mut self, ctx: &mut Context) -> GameResult {
-    if keyboard::is_key_pressed(ctx, KeyCode::Right) {
-      self.direction = Direction::Right;
-    }
-    if keyboard::is_key_pressed(ctx, KeyCode::Down) {
-      self.direction = Direction::Down;
-    }
-    if keyboard::is_key_pressed(ctx, KeyCode::Left) {
-      self.direction = Direction::Left;
-    }
-    if keyboard::is_key_pressed(ctx, KeyCode::Up) {
-      self.direction = Direction::Up;
+    match self.state {
+      State::Waiting => {
+        if keyboard::is_key_pressed(ctx, KeyCode::Space) {
+          self.state = State::Ongoing;
+        }
+      },
+      _ => {
+        if keyboard::is_key_pressed(ctx, KeyCode::Right) {
+          self.direction = Direction::Right;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Down) {
+          self.direction = Direction::Down;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Left) {
+          self.direction = Direction::Left;
+        }
+        if keyboard::is_key_pressed(ctx, KeyCode::Up) {
+          self.direction = Direction::Up;
+        }
+      }
     }
 
     Ok(())
@@ -156,6 +174,13 @@ impl GameState {
 
 impl event::EventHandler for GameState {
   fn update(&mut self, ctx: &mut Context) -> GameResult {
+    self.update_keyboard(ctx);
+
+    match self.state {
+      State::Waiting => return Ok(()),
+      _ => ()
+    }
+
     self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
 
     if self.acc_time >= TICK {
@@ -163,7 +188,6 @@ impl event::EventHandler for GameState {
       self.acc_time = 0.0;
     }
 
-    self.update_keyboard(ctx);
     self.update_food();
 
     Ok(())
