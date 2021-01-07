@@ -9,18 +9,18 @@ use rand::prelude::*;
 const TILES: (u16, u16) = (10, 10);
 
 // Size of the tiles
-const TILE_SIZE: (u16, u16) = (20, 20);
+const TILE_SIZE: (u16, u16) = (64, 64);
 
 // Colors of the game entities
-const BG_COLOR: (u8, u8, u8) = (127, 127, 255);
-const SNAKE_COLOR: (u8, u8, u8) = (63, 127, 63);
-const FOOD_COLOR: (u8, u8, u8) = (255, 127, 0);
+const BG_COLOR: (u8, u8, u8) = (0, 0, 0);
+const SNAKE_COLOR: (u8, u8, u8) = (127, 127, 127);
+const FOOD_COLOR: (u8, u8, u8) = (255, 255, 255);
 
 // padding around the tiles
-const PADDING: u16 = 2;
+const PADDING: u16 = 8;
 
 // secs between each move of the snake
-const TICK: f32 = 0.3;
+const TICK: f32 = 0.2;
 
 enum Direction {
   Up,
@@ -123,8 +123,8 @@ impl GameState {
 
     if &self.food == last_cell {
       let mut rng = rand::thread_rng();
-      let food_x = (rng.gen::<f32>() * TILES.0 as f32) as u16;
-      let food_y = (rng.gen::<f32>() * TILES.0 as f32) as u16;
+      let food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
+      let food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
 
       self.food = (food_x, food_y);
       self.grow();
