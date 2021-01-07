@@ -11,6 +11,7 @@ const TILE_SIZE: (u16, u16) = (20, 20);
 const BG_COLOR: (u8, u8, u8) = (127, 127, 255);
 const SNAKE_COLOR: (u8, u8, u8) = (63, 127, 63);
 const FOOD_COLOR: (u8, u8, u8) = (255, 127, 0);
+const PADDING: u16 = 2;
 
 enum Direction {
   Up,
@@ -42,9 +43,10 @@ impl GameState {
   fn draw_snake(&mut self, ctx: &mut Context) -> GameResult {
     for cell in &self.snake {
       let rect = graphics::Rect::new(
-        (cell.0 * TILE_SIZE.0) as f32,
-        (cell.1 * TILE_SIZE.1) as f32,
-        TILE_SIZE.0 as f32, TILE_SIZE.1 as f32);
+        (cell.0 * TILE_SIZE.0 + PADDING) as f32,
+        (cell.1 * TILE_SIZE.1 + PADDING) as f32,
+        (TILE_SIZE.0 - PADDING) as f32,
+        (TILE_SIZE.1 - PADDING) as f32);
 
       let rect_mesh = graphics::Mesh::new_rectangle(ctx,
         graphics::DrawMode::fill(), rect,
@@ -59,9 +61,10 @@ impl GameState {
 
   fn draw_food(&mut self, ctx: &mut Context) -> GameResult {
     let rect = graphics::Rect::new(
-      (self.food.0 * TILE_SIZE.0) as f32,
-      (self.food.1 * TILE_SIZE.1) as f32,
-      TILE_SIZE.0 as f32, TILE_SIZE.1 as f32);
+      (self.food.0 * TILE_SIZE.0 + PADDING) as f32,
+      (self.food.1 * TILE_SIZE.1 + PADDING) as f32,
+      (TILE_SIZE.0 - PADDING) as f32,
+      (TILE_SIZE.1 - PADDING) as f32);
 
     let rect_mesh = graphics::Mesh::new_rectangle(ctx,
       graphics::DrawMode::fill(), rect,
