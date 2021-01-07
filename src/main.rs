@@ -5,11 +5,8 @@ use ggez::event;
 use ggez::input::keyboard::{self, KeyCode};
 use rand::prelude::*;
 
-// Size of the screen in pixels
-const SCREEN: (f32, f32) = (800.0, 600.0);
-
 // Number of tiles in the screen
-const TILES: (u16, u16) = (40, 30);
+const TILES: (u16, u16) = (10, 10);
 
 // Size of the tiles
 const TILE_SIZE: (u16, u16) = (20, 20);
@@ -23,7 +20,7 @@ const FOOD_COLOR: (u8, u8, u8) = (255, 127, 0);
 const PADDING: u16 = 2;
 
 // secs between each move of the snake
-const TICK: f32 = 1.0;
+const TICK: f32 = 0.3;
 
 enum Direction {
   Up,
@@ -103,17 +100,8 @@ impl GameState {
     self.snake.remove(0);
     Ok(())
   }
-}
 
-impl event::EventHandler for GameState {
-  fn update(&mut self, ctx: &mut Context) -> GameResult {
-    self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
-
-    if self.acc_time >= TICK {
-      self.move_snake();
-      self.acc_time = 0.0;
-    }
-
+  fn update_keyboard(&mut self, ctx: &mut Context) -> GameResult {
     if keyboard::is_key_pressed(ctx, KeyCode::Right) {
       self.direction = Direction::Right;
     }
@@ -126,6 +114,45 @@ impl event::EventHandler for GameState {
     if keyboard::is_key_pressed(ctx, KeyCode::Up) {
       self.direction = Direction::Up;
     }
+
+    Ok(())
+  }
+
+  fn update_food(&mut self) {
+    let last_cell = &self.snake[self.snake.len() - 1];
+
+    if &self.food == last_cell {
+      let mut rng = rand::thread_rng();
+      let food_x = (rng.gen::<f32>() * TILES.0 as f32) as u16;
+      let food_y = (rng.gen::<f32>() * TILES.0 as f32) as u16;
+
+      self.food = (food_x, food_y);
+      self.grow();
+    }
+  }
+
+  fn grow(&mut self) {
+    let last_cell = &self.snake[self.snake.len() - 1];
+    match self.direction {
+      Direction::Right => self.snake.push((last_cell.0 + 1, last_cell.1)),
+      Direction::Down => self.snake.push((last_cell.0, last_cell.1 + 1)),
+      Direction::Left => self.snake.push((last_cell.0 - 1, last_cell.1)),
+      Direction::Up => self.snake.push((last_cell.0, last_cell.1 - 1))
+    };
+  }
+}
+
+impl event::EventHandler for GameState {
+  fn update(&mut self, ctx: &mut Context) -> GameResult {
+    self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
+
+    if self.acc_time >= TICK {
+      self.move_snake();
+      self.acc_time = 0.0;
+    }
+
+    self.update_keyboard(ctx);
+    self.update_food();
 
     Ok(())
   }
@@ -144,8 +171,9 @@ impl event::EventHandler for GameState {
 
 fn main() -> GameResult {
   let cb = ggez::ContextBuilder::new("Snake", "Y.D.S.")
-    .window_mode(ggez::conf::WindowMode::default()
-      .dimensions(SCREEN.0, SCREEN.1));
+    .window_mode(ggez::conf::WindowMode::default().dimensions(
+      (TILES.0 * TILE_SIZE.0) as f32,
+      (TILES.1 * TILE_SIZE.1) as f32));
 
   let (ctx, event_loop) = &mut cb.build()?;
   graphics::set_window_title(ctx, "Rusty Snake: RUSNAKE");
