@@ -3,6 +3,9 @@ use ggez::{GameResult};
 use ggez::graphics;
 use ggez::event;
 
+mod config;
+use config::*;
+
 mod gamestate;
 use gamestate::*;
 
@@ -32,6 +35,7 @@ enum Direction {
 
 
 fn main() -> GameResult {
+  get_config();
   let cb = ggez::ContextBuilder::new("Snake", "Y.D.S.")
     .window_mode(ggez::conf::WindowMode::default().dimensions(
       (TILES.0 * TILE_SIZE.0) as f32,
