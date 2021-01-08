@@ -11,6 +11,7 @@ enum State {
 }
 
 pub struct GameState {
+  cfg: Config,
   snake: Vec<(u16, u16)>,
   food: (u16, u16),
   direction: Direction,
@@ -19,7 +20,7 @@ pub struct GameState {
 }
 
 impl GameState {
-  pub fn new() -> Self {
+  pub fn new(cfg: Config) -> Self {
     let snake = vec![(1, 1), (2, 1), (3, 1)];
     let food = (5, 5);
     let direction = Direction::Right;
@@ -27,6 +28,7 @@ impl GameState {
     let state = State::Waiting;
 
     GameState {
+      cfg,
       snake,
       food,
       direction,
@@ -38,15 +40,15 @@ impl GameState {
   fn draw_snake(&mut self, ctx: &mut Context) -> GameResult {
     for cell in &self.snake {
       let rect = graphics::Rect::new(
-        (cell.0 * TILE_SIZE.0 + PADDING) as f32,
-        (cell.1 * TILE_SIZE.1 + PADDING) as f32,
-        (TILE_SIZE.0 - PADDING) as f32,
-        (TILE_SIZE.1 - PADDING) as f32);
+        (cell.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,
+        (cell.1 * self.cfg.tile_size.1 + self.cfg.padding) as f32,
+        (self.cfg.tile_size.0 - self.cfg.padding) as f32,
+        (self.cfg.tile_size.1 - self.cfg.padding) as f32);
 
       let rect_mesh = graphics::Mesh::new_rectangle(ctx,
         graphics::DrawMode::fill(), rect,
-        graphics::Color::from_rgb(
-          SNAKE_COLOR.0, SNAKE_COLOR.1, SNAKE_COLOR.2))?;
+        graphics::Color::from_rgb(self.cfg.snake_color.0, 
+          self.cfg.snake_color.1, self.cfg.snake_color.2))?;
 
       graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
     }
@@ -56,14 +58,15 @@ impl GameState {
 
   fn draw_food(&mut self, ctx: &mut Context) -> GameResult {
     let rect = graphics::Rect::new(
-      (self.food.0 * TILE_SIZE.0 + PADDING) as f32,
-      (self.food.1 * TILE_SIZE.1 + PADDING) as f32,
-      (TILE_SIZE.0 - PADDING) as f32,
-      (TILE_SIZE.1 - PADDING) as f32);
+      (self.food.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,
+      (self.food.1 * self.cfg.tile_size.1 + self.cfg.padding) as f32,
+      (self.cfg.tile_size.0 - self.cfg.padding) as f32,
+      (self.cfg.tile_size.1 - self.cfg.padding) as f32);
 
     let rect_mesh = graphics::Mesh::new_rectangle(ctx,
       graphics::DrawMode::fill(), rect,
-      graphics::Color::from_rgb(FOOD_COLOR.0, FOOD_COLOR.1, FOOD_COLOR.2))?;
+      graphics::Color::from_rgb(
+        self.cfg.food_color.0, self.cfg.food_color.1, self.cfg.food_color.2))?;
 
     graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
 
@@ -76,14 +79,14 @@ impl GameState {
 
     match self.direction {
       Direction::Right => {
-        if last_cell.0 + 1 >= TILES.0 {
+        if last_cell.0 + 1 >= self.cfg.tiles.0 {
           new_cell = (0, last_cell.1);
         } else {
           new_cell = (last_cell.0 + 1, last_cell.1);
         }
       },
       Direction::Down => {
-        if last_cell.1 + 1 >= TILES.1 {
+        if last_cell.1 + 1 >= self.cfg.tiles.1 {
           new_cell = (last_cell.0, 0);
         } else {
           new_cell = (last_cell.0, last_cell.1 + 1);
@@ -91,14 +94,14 @@ impl GameState {
       },
       Direction::Left => {
         if last_cell.0 == 0 {
-          new_cell = (TILES.0 - 1, last_cell.1);
+          new_cell = (self.cfg.tiles.0 - 1, last_cell.1);
         } else {
           new_cell = (last_cell.0 - 1, last_cell.1);
         }
       },
       Direction::Up => {
         if last_cell.1 == 0 {
-          new_cell = (last_cell.0, TILES.1 - 1);
+          new_cell = (last_cell.0, self.cfg.tiles.1 - 1);
         } else {
           new_cell = (last_cell.0, last_cell.1 - 1);
         }
@@ -109,7 +112,6 @@ impl GameState {
 
     if self.snake.iter().any(|&cell| cell == new_cell) {
       self.state = State::Dead;
-      println!("dead!");
     }
 
     self.snake.push(new_cell);
@@ -168,8 +170,8 @@ impl GameState {
     let mut rng = rand::thread_rng();
 
     loop {
-      let food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
-      let food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
+      let food_x = (rng.gen::<f32>() * (self.cfg.tiles.0 - 2) as f32) as u16 + 1;
+      let food_y = (rng.gen::<f32>() * (self.cfg.tiles.1 - 2) as f32) as u16 + 1;
 
       if self.snake.iter().any(|&cell| cell == (food_x, food_y)) {
         continue;
@@ -189,8 +191,6 @@ impl GameState {
       Direction::Left => self.snake.push((last_cell.0 - 1, last_cell.1)),
       Direction::Up => self.snake.push((last_cell.0, last_cell.1 - 1))
     };
-
-    println!("Snake size: {}", self.snake.len());
   }
 }
 
@@ -203,7 +203,7 @@ impl event::EventHandler for GameState {
       State::Ongoing => {
         self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
 
-        if self.acc_time >= TICK {
+        if self.acc_time >= self.cfg.tick {
           self.move_snake()?;
           self.update_food();
           self.acc_time = 0.0;
@@ -217,7 +217,7 @@ impl event::EventHandler for GameState {
 
   fn draw(&mut self, ctx: &mut Context) -> GameResult {
     graphics::clear(ctx, graphics::Color::from_rgb(
-      BG_COLOR.0, BG_COLOR.1, BG_COLOR.2));
+      self.cfg.bg_color.0, self.cfg.bg_color.1, self.cfg.bg_color.2));
 
     self.draw_snake(ctx)?;
     self.draw_food(ctx)?;

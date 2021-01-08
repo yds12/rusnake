@@ -3,13 +3,13 @@ use std::fs;
 const CONFIG_PATH: &str = "config.txt";
 
 pub struct Config {
-  tiles: (u16, u16),
-  tile_size: (u16, u16),
-  bg_color: (u8, u8, u8),
-  snake_color: (u8, u8, u8),
-  food_color: (u8, u8, u8),
-  padding: u16,
-  tick: f32
+  pub tiles: (u16, u16),
+  pub tile_size: (u16, u16),
+  pub bg_color: (u8, u8, u8),
+  pub snake_color: (u8, u8, u8),
+  pub food_color: (u8, u8, u8),
+  pub padding: u16,
+  pub tick: f32
 }
 
 fn get_u16pair(value: &str) -> (u16, u16) {
@@ -26,8 +26,6 @@ fn get_color(value: &str) -> (u8, u8, u8) {
 
 pub fn get_config() -> Config {
   let data = fs::read_to_string(CONFIG_PATH).expect("Failed to read config file.");
-  println!("{}", data);
-
   let lines = data.split("\n");
 
   let mut tiles: (u16, u16) = (12, 12);
