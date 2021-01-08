@@ -21,7 +21,7 @@ const FOOD_COLOR: (u8, u8, u8) = (255, 255, 255);
 const PADDING: u16 = 8;
 
 // secs between each move of the snake
-const TICK: f32 = 0.2;
+const TICK: f32 = 0.15;
 
 enum Direction {
   Up,
@@ -41,7 +41,7 @@ fn main() -> GameResult {
   graphics::set_window_title(ctx, "Rusty Snake: RUSNAKE");
 
   let mut state = GameState::new();
-  event::run(ctx, event_loop, &mut state);
+  event::run(ctx, event_loop, &mut state)?;
 
   Ok(())
 }

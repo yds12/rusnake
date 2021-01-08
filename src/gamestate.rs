@@ -20,12 +20,11 @@ pub struct GameState {
 
 impl GameState {
   pub fn new() -> Self {
-    let mut rng = rand::thread_rng();
-    let mut snake = vec![(1, 1), (2, 1), (3, 1)];
-    let mut food = (5, 5);
-    let mut direction = Direction::Right;
-    let mut acc_time = 0.0;
-    let mut state = State::Waiting;
+    let snake = vec![(1, 1), (2, 1), (3, 1)];
+    let food = (5, 5);
+    let direction = Direction::Right;
+    let acc_time = 0.0;
+    let state = State::Waiting;
 
     GameState {
       snake,
@@ -73,7 +72,7 @@ impl GameState {
 
   fn move_snake(&mut self) -> GameResult {
     let last_cell = &self.snake[self.snake.len() - 1];
-    let mut new_cell;
+    let new_cell;
 
     match self.direction {
       Direction::Right => {
@@ -169,8 +168,8 @@ impl GameState {
     let mut rng = rand::thread_rng();
 
     loop {
-      let mut food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
-      let mut food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
+      let food_x = (rng.gen::<f32>() * (TILES.0 - 2) as f32) as u16 + 1;
+      let food_y = (rng.gen::<f32>() * (TILES.1 - 2) as f32) as u16 + 1;
 
       if self.snake.iter().any(|&cell| cell == (food_x, food_y)) {
         continue;
@@ -182,7 +181,8 @@ impl GameState {
   }
 
   fn grow(&mut self) {
-    let last_cell = &self.snake[self.snake.len() - 1];
+    let last_cell = self.snake[self.snake.len() - 1];
+
     match self.direction {
       Direction::Right => self.snake.push((last_cell.0 + 1, last_cell.1)),
       Direction::Down => self.snake.push((last_cell.0, last_cell.1 + 1)),
@@ -196,7 +196,7 @@ impl GameState {
 
 impl event::EventHandler for GameState {
   fn update(&mut self, ctx: &mut Context) -> GameResult {
-    self.update_keyboard(ctx);
+    self.update_keyboard(ctx)?;
 
     match self.state {
       State::Waiting => return Ok(()),
@@ -204,11 +204,10 @@ impl event::EventHandler for GameState {
         self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
 
         if self.acc_time >= TICK {
-          self.move_snake();
+          self.move_snake()?;
+          self.update_food();
           self.acc_time = 0.0;
         }
-
-        self.update_food();
       },
       State::Dead => ()
     }
@@ -220,8 +219,8 @@ impl event::EventHandler for GameState {
     graphics::clear(ctx, graphics::Color::from_rgb(
       BG_COLOR.0, BG_COLOR.1, BG_COLOR.2));
 
-    self.draw_snake(ctx);
-    self.draw_food(ctx);
+    self.draw_snake(ctx)?;
+    self.draw_food(ctx)?;
 
     graphics::present(ctx)?;
     Ok(())
