@@ -98,15 +98,24 @@ impl GameState {
 
   fn move_snake(&mut self) -> GameResult {
     let last_cell = &self.snake[self.snake.len() - 1];
+    let mut new_cell;
 
     match self.direction {
-      Direction::Right => self.snake.push((last_cell.0 + 1, last_cell.1)),
-      Direction::Down => self.snake.push((last_cell.0, last_cell.1 + 1)),
-      Direction::Left => self.snake.push((last_cell.0 - 1, last_cell.1)),
-      Direction::Up => self.snake.push((last_cell.0, last_cell.1 - 1))
+      Direction::Right => new_cell = (last_cell.0 + 1, last_cell.1),
+      Direction::Down => new_cell = (last_cell.0, last_cell.1 + 1),
+      Direction::Left => new_cell = (last_cell.0 - 1, last_cell.1),
+      Direction::Up => new_cell = (last_cell.0, last_cell.1 - 1)
     };
 
     self.snake.remove(0);
+
+    if self.snake.iter().any(|&cell| cell == new_cell) {
+      self.state = State::Dead;
+      println!("dead!");
+    }
+
+    self.snake.push(new_cell);
+
     Ok(())
   }
 
@@ -178,17 +187,18 @@ impl event::EventHandler for GameState {
 
     match self.state {
       State::Waiting => return Ok(()),
-      _ => ()
+      State::Ongoing => {
+        self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
+
+        if self.acc_time >= TICK {
+          self.move_snake();
+          self.acc_time = 0.0;
+        }
+
+        self.update_food();
+      },
+      State::Dead => ()
     }
-
-    self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
-
-    if self.acc_time >= TICK {
-      self.move_snake();
-      self.acc_time = 0.0;
-    }
-
-    self.update_food();
 
     Ok(())
   }
