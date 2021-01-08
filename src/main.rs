@@ -7,7 +7,7 @@ mod gamestate;
 use gamestate::*;
 
 // Number of tiles in the screen
-const TILES: (u16, u16) = (10, 10);
+const TILES: (u16, u16) = (12, 12);
 
 // Size of the tiles
 const TILE_SIZE: (u16, u16) = (64, 64);

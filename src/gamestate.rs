@@ -76,10 +76,34 @@ impl GameState {
     let mut new_cell;
 
     match self.direction {
-      Direction::Right => new_cell = (last_cell.0 + 1, last_cell.1),
-      Direction::Down => new_cell = (last_cell.0, last_cell.1 + 1),
-      Direction::Left => new_cell = (last_cell.0 - 1, last_cell.1),
-      Direction::Up => new_cell = (last_cell.0, last_cell.1 - 1)
+      Direction::Right => {
+        if last_cell.0 + 1 >= TILES.0 {
+          new_cell = (0, last_cell.1);
+        } else {
+          new_cell = (last_cell.0 + 1, last_cell.1);
+        }
+      },
+      Direction::Down => {
+        if last_cell.1 + 1 >= TILES.1 {
+          new_cell = (last_cell.0, 0);
+        } else {
+          new_cell = (last_cell.0, last_cell.1 + 1);
+        }
+      },
+      Direction::Left => {
+        if last_cell.0 == 0 {
+          new_cell = (TILES.0 - 1, last_cell.1);
+        } else {
+          new_cell = (last_cell.0 - 1, last_cell.1);
+        }
+      },
+      Direction::Up => {
+        if last_cell.1 == 0 {
+          new_cell = (last_cell.0, TILES.1 - 1);
+        } else {
+          new_cell = (last_cell.0, last_cell.1 - 1);
+        }
+      }
     };
 
     self.snake.remove(0);
@@ -136,8 +160,8 @@ impl GameState {
     let last_cell = &self.snake[self.snake.len() - 1];
 
     if &self.food == last_cell {
-      self.gen_food();
       self.grow();
+      self.gen_food();
     }
   }
 
@@ -165,6 +189,8 @@ impl GameState {
       Direction::Left => self.snake.push((last_cell.0 - 1, last_cell.1)),
       Direction::Up => self.snake.push((last_cell.0, last_cell.1 - 1))
     };
+
+    println!("Snake size: {}", self.snake.len());
   }
 }
 
