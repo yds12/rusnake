@@ -128,16 +128,28 @@ impl GameState {
       },
       _ => {
         if keyboard::is_key_pressed(ctx, KeyCode::Right) {
-          self.direction = Direction::Right;
+          match self.direction {
+            Direction::Left => (),
+            _ => self.direction = Direction::Right
+          }
         }
         if keyboard::is_key_pressed(ctx, KeyCode::Down) {
-          self.direction = Direction::Down;
+          match self.direction {
+            Direction::Up => (),
+            _ => self.direction = Direction::Down
+          }
         }
         if keyboard::is_key_pressed(ctx, KeyCode::Left) {
-          self.direction = Direction::Left;
+          match self.direction {
+            Direction::Right => (),
+            _ => self.direction = Direction::Left
+          }
         }
         if keyboard::is_key_pressed(ctx, KeyCode::Up) {
-          self.direction = Direction::Up;
+          match self.direction {
+            Direction::Down => (),
+            _ => self.direction = Direction::Up
+          }
         }
       }
     }
