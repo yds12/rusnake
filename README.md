@@ -11,3 +11,7 @@ Classic snake game in Rust using the `ggez` library.
 4. Then `cargo run`;
 
 5. Have fun!
+
+# Gameplay
+
+Press `SPACE` to start (or restart) the game. Use the arrow keys to move.
