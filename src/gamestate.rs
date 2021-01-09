@@ -133,7 +133,7 @@ impl GameState {
           self.state = State::Ongoing;
         }
       },
-      _ => {
+      State::Ongoing => {
         if keyboard::is_key_pressed(ctx, KeyCode::Right) {
           match self.direction {
             Direction::Left => (),
@@ -157,6 +157,11 @@ impl GameState {
             Direction::Down => (),
             _ => self.direction = Direction::Up
           }
+        }
+      },
+      State::Dead => {
+        if keyboard::is_key_pressed(ctx, KeyCode::Space) {
+          *self = GameState::new(self.cfg);
         }
       }
     }

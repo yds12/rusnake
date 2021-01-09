@@ -2,6 +2,7 @@ use std::fs;
 
 const CONFIG_PATH: &str = "config.txt";
 
+#[derive(Clone, Copy)]
 pub struct Config {
   pub tiles: (u16, u16),
   pub tile_size: (u16, u16),
