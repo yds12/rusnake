@@ -4,6 +4,13 @@ use rand::prelude::*;
 use ggez::graphics;
 use crate::*;
 
+enum Direction {
+  Up,
+  Right,
+  Down,
+  Left
+}
+
 enum State {
   Waiting,
   Ongoing,

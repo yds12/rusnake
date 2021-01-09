@@ -9,13 +9,6 @@ use config::*;
 mod gamestate;
 use gamestate::*;
 
-enum Direction {
-  Up,
-  Right,
-  Down,
-  Left
-}
-
 fn main() -> GameResult {
   let cfg = get_config();
   let cb = ggez::ContextBuilder::new("Snake", "Y.D.S.")
