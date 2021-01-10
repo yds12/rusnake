@@ -36,6 +36,7 @@ fn main() -> GameResult {
   let mut state = GameState::new(cfg);
   state.load_sounds(ctx)?;
   let mut music = audio::Source::new(ctx, "/synthwave.ogg")?;
+  music.set_repeat(true);
   music.set_volume(0.5);
   music.play_detached()?;
   event::run(ctx, event_loop, &mut state)?;
