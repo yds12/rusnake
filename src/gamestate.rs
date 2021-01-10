@@ -195,6 +195,7 @@ impl GameState {
       State::Dead => {
         if keyboard::is_key_pressed(ctx, KeyCode::Space) {
           *self = GameState::new(self.cfg);
+          self.load_sounds(ctx)?;
         }
       }
     }
