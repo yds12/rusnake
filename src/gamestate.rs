@@ -3,6 +3,8 @@ use ggez::input::keyboard::{self, KeyCode};
 use rand::prelude::*;
 use ggez::graphics;
 use ggez::mint::Point2;
+use ggez::audio;
+use ggez::audio::SoundSource;
 use crate::*;
 
 enum Direction {
@@ -24,7 +26,8 @@ pub struct GameState {
   food: (u16, u16),
   direction: Direction,
   acc_time: f32,
-  state: State
+  state: State,
+  eat_sound: Option<Box<dyn SoundSource>>
 }
 
 impl GameState {
@@ -34,6 +37,7 @@ impl GameState {
     let direction = Direction::Right;
     let acc_time = 0.0;
     let state = State::Waiting;
+    let eat_sound = None;
 
     GameState {
       cfg,
@@ -41,7 +45,8 @@ impl GameState {
       food,
       direction,
       acc_time,
-      state
+      state,
+      eat_sound
     }
   }
 
@@ -95,6 +100,16 @@ impl GameState {
     let text = graphics::Text::new(text_fragment);
 
     graphics::draw(ctx, &text, param)?;
+    Ok(())
+  }
+
+  pub fn load_sounds(&mut self, ctx: &mut Context) -> GameResult {
+    self.eat_sound = Some(Box::new(audio::Source::new(ctx, "/coin.wav")?));
+    Ok(())
+  }
+
+  fn play_eat_sound(&mut self) -> GameResult {
+    self.eat_sound.as_mut().unwrap().play_detached()?;
     Ok(())
   }
 
@@ -187,13 +202,16 @@ impl GameState {
     Ok(())
   }
 
-  fn update_food(&mut self) {
+  fn update_food(&mut self) -> GameResult {
     let last_cell = &self.snake[self.snake.len() - 1];
 
     if &self.food == last_cell {
+      self.play_eat_sound()?;
       self.grow();
       self.gen_food();
     }
+
+    Ok(())
   }
 
   fn gen_food(&mut self) {
@@ -235,7 +253,7 @@ impl event::EventHandler for GameState {
 
         if self.acc_time >= self.cfg.tick {
           self.move_snake()?;
-          self.update_food();
+          self.update_food()?;
           self.acc_time = 0.0;
         }
       },
