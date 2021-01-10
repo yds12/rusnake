@@ -4,6 +4,8 @@ use ggez;
 use ggez::{GameResult};
 use ggez::graphics;
 use ggez::event;
+use ggez::audio;
+use ggez::audio::SoundSource;
 
 mod config;
 use config::*;
@@ -33,6 +35,9 @@ fn main() -> GameResult {
 
   let mut state = GameState::new(cfg);
   state.load_sounds(ctx)?;
+  let mut music = audio::Source::new(ctx, "/synthwave.wav")?;
+  music.set_volume(0.5);
+  music.play_detached()?;
   event::run(ctx, event_loop, &mut state)?;
 
   Ok(())
