@@ -2,6 +2,7 @@ use ggez::{Context, GameResult};
 use ggez::input::keyboard::{self, KeyCode};
 use rand::prelude::*;
 use ggez::graphics;
+use ggez::mint::Point2;
 use crate::*;
 
 enum Direction {
@@ -77,6 +78,23 @@ impl GameState {
 
     graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
 
+    Ok(())
+  }
+
+  fn draw_dead_text(&mut self, ctx: &mut Context) -> GameResult {
+    let mut param = graphics::DrawParam::default();
+    param.dest = Point2 { x: 10.0, y: 10.0 };
+
+    let text_fragment =
+      graphics::TextFragment::new("You died! Press SPACE to restart.")
+      .color(graphics::Color::new(
+        self.cfg.text_color.0 as f32,
+        self.cfg.text_color.1 as f32,
+        self.cfg.text_color.2 as f32, 255.0));
+
+    let text = graphics::Text::new(text_fragment);
+
+    graphics::draw(ctx, &text, param)?;
     Ok(())
   }
 
@@ -233,6 +251,11 @@ impl event::EventHandler for GameState {
 
     self.draw_snake(ctx)?;
     self.draw_food(ctx)?;
+
+    match self.state {
+      State::Dead => self.draw_dead_text(ctx)?,
+      _ => ()
+    }
 
     graphics::present(ctx)?;
     Ok(())

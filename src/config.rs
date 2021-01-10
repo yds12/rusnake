@@ -9,6 +9,7 @@ pub struct Config {
   pub bg_color: (u8, u8, u8),
   pub snake_color: (u8, u8, u8),
   pub food_color: (u8, u8, u8),
+  pub text_color: (u8, u8, u8),
   pub padding: u16,
   pub tick: f32
 }
@@ -34,6 +35,7 @@ pub fn get_config() -> Config {
   let mut bg_color: (u8, u8, u8) = (0, 0, 0);
   let mut snake_color: (u8, u8, u8) = (127, 127, 127);
   let mut food_color: (u8, u8, u8) = (255, 255, 255);
+  let mut text_color: (u8, u8, u8) = (255, 255, 127);
   let mut padding: u16 = 8;
   let mut tick: f32 = 0.15;
 
@@ -48,6 +50,7 @@ pub fn get_config() -> Config {
           "BG_COLOR" => bg_color = get_color(parts[1]),
           "SNAKE_COLOR" => snake_color = get_color(parts[1]),
           "FOOD_COLOR" => food_color = get_color(parts[1]),
+          "TEXT_COLOR" => text_color = get_color(parts[1]),
           "PADDING" => padding = parts[1].trim().parse::<u16>().unwrap(),
           "TICK" => tick = parts[1].trim().parse::<f32>().unwrap(),
           _ => println!("Unrecognized configuration key: {}",
@@ -66,6 +69,7 @@ pub fn get_config() -> Config {
     bg_color,
     snake_color,
     food_color,
+    text_color,
     padding,
     tick
   }
