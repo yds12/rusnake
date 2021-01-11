@@ -17,6 +17,7 @@ enum Direction {
 enum State {
   Waiting,
   Ongoing,
+  Paused,
   Dead
 }
 
@@ -161,8 +162,9 @@ impl GameState {
 
   fn update_keyboard(&mut self, ctx: &mut Context) -> GameResult {
     match self.state {
-      State::Waiting => {
-        if keyboard::is_key_pressed(ctx, KeyCode::Space) {
+      State::Waiting | State::Paused => {
+        if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
+           !keyboard::is_key_repeated(ctx) {
           self.state = State::Ongoing;
         }
       },
@@ -191,9 +193,14 @@ impl GameState {
             _ => self.direction = Direction::Up
           }
         }
+        if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
+           !keyboard::is_key_repeated(ctx) {
+          self.state = State::Paused;
+        }
       },
       State::Dead => {
-        if keyboard::is_key_pressed(ctx, KeyCode::Space) {
+        if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
+           !keyboard::is_key_repeated(ctx) {
           *self = GameState::new(self.cfg);
           self.load_sounds(ctx)?;
         }
@@ -248,7 +255,7 @@ impl event::EventHandler for GameState {
     self.update_keyboard(ctx)?;
 
     match self.state {
-      State::Waiting => return Ok(()),
+      State::Waiting | State::Paused => return Ok(()),
       State::Ongoing => {
         self.acc_time += ggez::timer::delta(ctx).as_secs_f32();
 
