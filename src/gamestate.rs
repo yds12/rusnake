@@ -21,6 +21,9 @@ enum State {
   Dead
 }
 
+// Minimum time in seconds between 2 key strokes
+const KEY_THRESHOLD: f32 = 0.2;
+
 pub struct GameState {
   cfg: Config,
   snake: Vec<(u16, u16)>,
@@ -28,7 +31,8 @@ pub struct GameState {
   direction: Direction,
   acc_time: f32,
   state: State,
-  eat_sound: Option<Box<dyn SoundSource>>
+  eat_sound: Option<Box<dyn SoundSource>>,
+  key_interval: f32
 }
 
 impl GameState {
@@ -39,6 +43,7 @@ impl GameState {
     let acc_time = 0.0;
     let state = State::Waiting;
     let eat_sound = None;
+    let key_interval = 0.0;
 
     GameState {
       cfg,
@@ -47,7 +52,8 @@ impl GameState {
       direction,
       acc_time,
       state,
-      eat_sound
+      eat_sound,
+      key_interval
     }
   }
 
@@ -161,11 +167,14 @@ impl GameState {
   }
 
   fn update_keyboard(&mut self, ctx: &mut Context) -> GameResult {
+    self.key_interval += ggez::timer::delta(ctx).as_secs_f32();
+
     match self.state {
       State::Waiting | State::Paused => {
         if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
-           !keyboard::is_key_repeated(ctx) {
+           self.key_interval > KEY_THRESHOLD {
           self.state = State::Ongoing;
+          self.key_interval = 0.0;
         }
       },
       State::Ongoing => {
@@ -194,13 +203,14 @@ impl GameState {
           }
         }
         if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
-           !keyboard::is_key_repeated(ctx) {
+           self.key_interval > KEY_THRESHOLD {
+          self.key_interval = 0.0;
           self.state = State::Paused;
         }
       },
       State::Dead => {
         if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
-           !keyboard::is_key_repeated(ctx) {
+           self.key_interval > KEY_THRESHOLD {
           *self = GameState::new(self.cfg);
           self.load_sounds(ctx)?;
         }
