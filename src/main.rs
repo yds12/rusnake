@@ -34,7 +34,7 @@ fn main() -> GameResult {
   graphics::set_window_title(ctx, "Rusty Snake: RUSNAKE");
 
   let mut state = GameState::new(cfg);
-  state.load_sounds(ctx)?;
+  state.load_resources(ctx)?;
   let mut music = audio::Source::new(ctx, "/synthwave.ogg")?;
   music.set_repeat(true);
   music.set_volume(0.5);

@@ -32,7 +32,8 @@ pub struct GameState {
   acc_time: f32,
   state: State,
   eat_sound: Option<Box<dyn SoundSource>>,
-  key_interval: f32
+  key_interval: f32,
+  snake_body_img: Option<Box<graphics::Image>>
 }
 
 impl GameState {
@@ -44,6 +45,7 @@ impl GameState {
     let state = State::Waiting;
     let eat_sound = None;
     let key_interval = 0.0;
+    let snake_body_img = None;
 
     GameState {
       cfg,
@@ -53,24 +55,38 @@ impl GameState {
       acc_time,
       state,
       eat_sound,
-      key_interval
+      key_interval,
+      snake_body_img
     }
   }
 
   fn draw_snake(&mut self, ctx: &mut Context) -> GameResult {
     for cell in &self.snake {
-      let rect = graphics::Rect::new(
-        (cell.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,
-        (cell.1 * self.cfg.tile_size.1 + self.cfg.padding) as f32,
-        (self.cfg.tile_size.0 - self.cfg.padding) as f32,
-        (self.cfg.tile_size.1 - self.cfg.padding) as f32);
+      let use_image = true;
 
-      let rect_mesh = graphics::Mesh::new_rectangle(ctx,
-        graphics::DrawMode::fill(), rect,
-        graphics::Color::from_rgb(self.cfg.snake_color.0, 
-          self.cfg.snake_color.1, self.cfg.snake_color.2))?;
+      if use_image {
+        let param = graphics::DrawParam::default()
+          .dest(Point2 {
+            x: (cell.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,
+            y: (cell.1 * self.cfg.tile_size.1 + self.cfg.padding) as f32 })
+          .scale(Point2 { x: self.cfg.tile_size.0 as f32 / 64.0,
+                          y: self.cfg.tile_size.1 as f32 / 64.0 });
 
-      graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
+        graphics::draw(ctx, self.snake_body_img.as_mut().unwrap().as_ref(), param)?;
+      } else {
+        let rect = graphics::Rect::new(
+          (cell.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,
+          (cell.1 * self.cfg.tile_size.1 + self.cfg.padding) as f32,
+          (self.cfg.tile_size.0 - self.cfg.padding) as f32,
+          (self.cfg.tile_size.1 - self.cfg.padding) as f32);
+
+        let rect_mesh = graphics::Mesh::new_rectangle(ctx,
+          graphics::DrawMode::fill(), rect,
+          graphics::Color::from_rgb(self.cfg.snake_color.0,
+            self.cfg.snake_color.1, self.cfg.snake_color.2))?;
+
+        graphics::draw(ctx, &rect_mesh, graphics::DrawParam::default())?;
+      }
     }
 
     Ok(())
@@ -110,8 +126,9 @@ impl GameState {
     Ok(())
   }
 
-  pub fn load_sounds(&mut self, ctx: &mut Context) -> GameResult {
+  pub fn load_resources(&mut self, ctx: &mut Context) -> GameResult {
     self.eat_sound = Some(Box::new(audio::Source::new(ctx, "/coin.wav")?));
+    self.snake_body_img = Some(Box::new(graphics::Image::new(ctx, "/ball.png")?));
     Ok(())
   }
 
@@ -212,7 +229,7 @@ impl GameState {
         if keyboard::is_key_pressed(ctx, KeyCode::Space) &&
            self.key_interval > KEY_THRESHOLD {
           *self = GameState::new(self.cfg);
-          self.load_sounds(ctx)?;
+          self.load_resources(ctx)?;
         }
       }
     }
