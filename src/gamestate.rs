@@ -62,9 +62,7 @@ impl GameState {
 
   fn draw_snake(&mut self, ctx: &mut Context) -> GameResult {
     for cell in &self.snake {
-      let use_image = true;
-
-      if use_image {
+      if self.cfg.use_image {
         let param = graphics::DrawParam::default()
           .dest(Point2 {
             x: (cell.0 * self.cfg.tile_size.0 + self.cfg.padding) as f32,

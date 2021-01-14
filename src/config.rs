@@ -11,7 +11,8 @@ pub struct Config {
   pub food_color: (u8, u8, u8),
   pub text_color: (u8, u8, u8),
   pub padding: u16,
-  pub tick: f32
+  pub tick: f32,
+  pub use_image: bool
 }
 
 fn get_u16pair(value: &str) -> (u16, u16) {
@@ -38,6 +39,7 @@ pub fn get_config() -> Config {
   let mut text_color: (u8, u8, u8) = (255, 255, 127);
   let mut padding: u16 = 8;
   let mut tick: f32 = 0.15;
+  let mut use_image: bool = false;
 
   for line in lines {
     if !line.trim().is_empty() {
@@ -53,6 +55,7 @@ pub fn get_config() -> Config {
           "TEXT_COLOR" => text_color = get_color(parts[1]),
           "PADDING" => padding = parts[1].trim().parse::<u16>().unwrap(),
           "TICK" => tick = parts[1].trim().parse::<f32>().unwrap(),
+          "USE_IMAGE" => use_image = parts[1].trim().parse::<bool>().unwrap(),
           _ => println!("Unrecognized configuration key: {}",
                  parts[0].trim().to_uppercase())
         }
@@ -71,7 +74,8 @@ pub fn get_config() -> Config {
     food_color,
     text_color,
     padding,
-    tick
+    tick,
+    use_image
   }
 }
 
