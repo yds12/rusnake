@@ -5,6 +5,7 @@ use ggez::graphics;
 use ggez::mint::Point2;
 use ggez::audio;
 use ggez::audio::SoundSource;
+use ggez::event::{Button, GamepadId};
 use crate::*;
 
 enum Direction {
@@ -310,6 +311,16 @@ impl event::EventHandler for GameState {
 
     graphics::present(ctx)?;
     Ok(())
+  }
+
+  fn gamepad_button_down_event(&mut self, _ctx: &mut Context, btn: Button, _id: GamepadId) {
+    match btn {
+      Button::DPadRight => self.direction = Direction::Right,
+      Button::DPadDown => self.direction = Direction::Down,
+      Button::DPadLeft => self.direction = Direction::Left,
+      Button::DPadUp => self.direction = Direction::Up,
+      _ => ()
+    }
   }
 }
 
